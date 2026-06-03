@@ -106,10 +106,6 @@ function isCodexAccountTokenError(error: unknown): boolean {
   return error instanceof Error && error.message.includes("Failed to extract accountId from token");
 }
 
-function asRecord(value: unknown): Record<string, unknown> | undefined {
-  return value && typeof value === "object" ? (value as Record<string, unknown>) : undefined;
-}
-
 async function subscribeCodexLiveDebugEvents(sessionKey: string): Promise<() => void> {
   if (!CODEX_HARNESS_DEBUG) {
     return () => undefined;
@@ -795,7 +791,7 @@ async function waitForCodexSubagentStarted(params: {
   childSessionKey: string;
   events: CapturedAgentEvent[];
 }): Promise<void> {
-  const deadline = Date.now() + Math.min(CODEX_HARNESS_REQUEST_TIMEOUT_MS, 120_000);
+  const deadline = Date.now() + CODEX_HARNESS_REQUEST_TIMEOUT_MS;
   while (Date.now() < deadline) {
     if (hasCodexAppServerLifecycleEvent(params)) {
       return;
@@ -880,6 +876,7 @@ async function verifyCodexSubagentProbe(params: {
         mode: "run",
         cleanup: "keep",
         context: "isolated",
+        lightContext: true,
         expectsCompletionMessage: false,
         runTimeoutSeconds: CODEX_HARNESS_AGENT_TIMEOUT_SECONDS,
       },
